@@ -1,0 +1,9 @@
+[package]
+name = "hexagon"
+version = "0.1.0"
+authors = ["Ty Overby <ty@pre-alpha.com>"]
+
+[dependencies]
+
+[dev-dependencies.lux]
+path = "../lux"
