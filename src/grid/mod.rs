@@ -10,6 +10,7 @@ pub trait Grid {
     }
     fn array_size(&self) -> usize;
     fn get_index(&self, pos: &HexPosition) -> Option<usize>;
+    fn inverse_index(&self, idx: usize) -> HexPosition;
     fn iter(&self) -> Self::Iter;
 }
 
@@ -21,8 +22,8 @@ pub struct Map<T, G: Grid> {
     count: usize,
 }
 
-pub struct MapIterator<'a, T: 'a, G: Grid + 'a, I> {
-    inner: I,
+pub struct MapIterator<'a, T: 'a, G: Grid + 'a> {
+    idx: usize,
     map: &'a Map<T, G>,
 }
 
@@ -117,9 +118,9 @@ impl <T, G: Grid> Map<T, G> {
         self.arr.get_mut(idx)
     }
 
-    pub fn iter(&self) -> MapIterator<T, G, G::Iter> {
+    pub fn iter(&self) -> MapIterator<T, G> {
         MapIterator {
-            inner: self.grid.iter(),
+            idx: 0,
             map: self
         }
     }
@@ -133,18 +134,25 @@ impl <T, G: Grid> Map<T, G> {
     }
 }
 
-impl <'a, T: 'a, G: 'a, I> Iterator for MapIterator<'a, T, G, I>
-where G: Grid, I: Iterator<Item=HexPosition> {
+impl <'a, T: 'a, G: 'a> Iterator for MapIterator<'a, T, G>
+where G: Grid {
     type Item = (HexPosition, &'a T);
     fn next(&mut self) -> Option<(HexPosition, &'a T)> {
-        loop {
-            match self.inner.next() {
-                Some(pos) => match self.map.get(&pos) {
-                    Some(item) => return Some((pos, item)),
-                    None => continue,
-                },
-                None => return None
-            }
+        // Find the next filled space
+        let mut i = self.idx;
+        while i < self.map.arr.len() && self.map.arr[i].is_none() {
+            i += 1;
         }
+        self.idx = i + 1;
+
+        if i == self.map.arr.len() {
+            return None;
+        }
+
+        let ret = (
+            self.map.grid.inverse_index(i),
+            self.map.arr.get(i).unwrap().as_ref().unwrap()
+        );
+        return Some(ret);
     }
 }

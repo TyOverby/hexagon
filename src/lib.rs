@@ -106,6 +106,7 @@ impl HexPosition {
             iter: self.ring_with_radius(0),
         }
     }
+
     pub fn rays(&self) -> [RayIterator; 6] {
         let directions = HexPosition::origin().neighbors();
         [
@@ -144,6 +145,10 @@ impl HexPosition {
             vector: Vector {inner: direction}
 		}
 	}
+
+    pub fn bidirectional_ray(&self, direction: u32) -> (RayIterator, RayIterator) {
+        (self.ray(direction), self.ray(direction + 3))
+    }
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd)]

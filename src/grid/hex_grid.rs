@@ -76,7 +76,32 @@ impl Grid for HexGrid {
         }
     }
 
+    fn inverse_index(&self, index: usize) -> HexPosition {
+        let delta_r = (self.max_r - self.min_r) as usize;
+
+        let r = index % (delta_r + 1);
+        let u = index / (delta_r + 1);
+
+        let r = r as i32 + self.min_r;
+        let u = u as i32 + self.min_u;
+        HexPosition::from_axial(r, u)
+    }
+
     fn iter(&self) -> Self::Iter {
         HexPosition::origin().spiral_to_radius(self.radius)
     }
+}
+
+#[test]
+fn get_inverse() {
+    fn test_inverse(p: HexPosition) {
+        let grid = HexGrid::new(5);
+        assert!(p == grid.inverse_index(grid.get_index(&p).unwrap()));
+    }
+
+    test_inverse(HexPosition::from_axial(0, 0));
+    test_inverse(HexPosition::from_axial(1, 0));
+    test_inverse(HexPosition::from_axial(0, -1));
+    test_inverse(HexPosition::from_axial(1, 2));
+    test_inverse(HexPosition::from_axial(2, -1));
 }

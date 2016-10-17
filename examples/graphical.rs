@@ -46,10 +46,12 @@ fn main() {
             draw_hex(&mut frame, &screenspace, &neighbor, [1.0, 0.0, 0.0, 1.0], 100.0);
         }*/
 
-        for ray in hex.rays().iter().cloned() {
-            for pos in ray.take(10) {
-                draw_hex(&mut frame, &screenspace, &pos, [1.0, 0.0, 0.0, 1.0], 100.0);
-            }
+        let (r1, r2) = hex.bidirectional_ray(4);
+        for pos in r1.take(10).skip(1) {
+            draw_hex(&mut frame, &screenspace, &pos, [1.0, 0.0, 0.0, 1.0], 100.0);
+        }
+        for pos in r2.take(10).skip(1) {
+            draw_hex(&mut frame, &screenspace, &pos, [1.0, 0.0, 0.0, 1.0], 100.0);
         }
 
         let near_cursor = &screenspace.nearest_hex(x, y);
